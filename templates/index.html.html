@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ DeepVision - Digital Store & Price Predictor</title>
+    
+    <style>
+        :root {
+            --primary-color: #007bff; /* Tech Blue */
+            --secondary-color: #1a1a1a; /* Dark Background */
+            --text-color: #f0f0f0; /* Light Text */
+            --accent-color: #00ffc8; /* Neon Cyan Accent */
+            --border-radius: 12px;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        /* --- Header & Navigation --- */
+        header {
+            width: 90%;
+            max-width: 1400px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-text {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--accent-color);
+            letter-spacing: 2px;
+            margin-left: 10px; /* Space between SVG and text */
+        }
+        
+        .deepvision-logo {
+            width: 30px;
+            height: 30px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .deepvision-logo:hover {
+             transform: rotate(15deg);
+        }
+        
+        .deepvision-logo path {
+            fill: none;
+            stroke: var(--accent-color);
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 5px var(--accent-color)); /* Effet néon */
+        }
+        
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            margin-left: 30px;
+            font-size: 1.1em;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+        
+        nav a:hover {
+            color: var(--accent-color);
+        }
+        
+        /* --- Hero Section (Home) --- */
+        .hero-section {
+            text-align: center;
+            padding: 100px 20px;
+            max-width: 800px;
+        }
+        
+        .hero-section h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        
+        .hero-section p {
+            font-size: 1.3em;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 40px;
+        }
+        
+        #accessFormButton {
+            background: linear-gradient(90deg, #007bff, #00ffc8);
+            color: var(--secondary-color);
+            border: none;
+            padding: 15px 35px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 0 15px rgba(0, 255, 200, 0.5); /* Neon Effect */
+        }
+        
+        #accessFormButton:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0, 255, 200, 0.8);
+        }
+
+        /* --- Global Overlay Style (Form and Placeholder) --- */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease-in-out, visibility 0.4s;
+            z-index: 1000;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-card {
+            background: var(--secondary-color);
+            border: 1px solid var(--accent-color);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            max-width: 700px;
+            width: 90%;
+            box-shadow: 0 0 30px rgba(0, 255, 200, 0.3);
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.4s ease-in-out;
+        }
+
+        .overlay.active .modal-card {
+            transform: scale(1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            font-size: 2em;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: white;
+        }
+
+        /* --- Form Specific Styles --- */
+        .form-card h2 {
+            color: var(--accent-color);
+            font-size: 2em;
+            margin-bottom: 10px;
+            border-bottom: 2px solid rgba(0, 255, 200, 0.2);
+            padding-bottom: 10px;
+        }
+
+        .form-description {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            background-color: #2c2c2c;
+            color: var(--text-color);
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 8px rgba(0, 255, 200, 0.5);
+            outline: none;
+            background-color: #383838;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .half-width {
+            flex: 1;
+        }
+
+        .predict-button {
+            width: 100%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1.3em;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            margin-top: 30px;
+        }
+
+        .predict-button:hover {
+            background: var(--accent-color);
+            color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        /* Result Area */
+        .result-area {
+            border: 1px solid var(--accent-color);
+            padding: 15px;
+            margin-top: 20px;
+            background-color: rgba(0, 255, 200, 0.1);
+            border-radius: 6px;
+            font-size: 1.0em;
+        }
+        
+        .result-area p {
+            margin: 6px 0;
+        }
+
+        .result-label {
+            font-weight: bold;
+        }
+
+        #predictedPrice {
+            color: var(--accent-color);
+            font-size: 1.3em;
+            margin-left: 6px;
+        }
+
+        /* --- Placeholder Modal Specific Styles --- */
+        .placeholder-card h3 {
+            color: white;
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+        .placeholder-card p {
+            font-size: 1.1em;
+            color: var(--accent-color);
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            margin-top: 25px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            color: rgba(255,255,255,0.8);
+            border-bottom: 1px solid rgba(0,255,200,0.2);
+            padding-bottom: 5px;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <svg class="deepvision-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M22 12h-2"/>
+                <path d="M4 12h-2"/>
+                <path d="M12 2v2"/>
+                <path d="M12 20v2"/>
+            </svg>
+            <div class="logo-text">DEEP-VISION</div>
+        </div>
+        
+        <nav>
+            <a onclick="showPlaceholder('Home')">Home</a>
+            <a onclick="showPlaceholder('Products')">Products</a>
+            <a onclick="showPlaceholder('Contact')">Contact</a>
+        </nav>
+    </header>
+    <main class="hero-section">
+        <h1>The Future of Commerce: Evaluate, Anticipate.</h1>
+        <p>Enter your product details and let our AI model predict its optimal market price, price category and product cluster.</p>
+        
+        <button id="accessFormButton" onclick="showPredictionForm()">
+            PREDICT A NEW PRODUCT'S PRICE
+        </button>
+    </main>
+
+    <!-- PREDICTION MODAL -->
+    <div id="predictionFormOverlay" class="overlay form-overlay">
+        <div class="modal-card form-card">
+            <button class="close-btn" onclick="closePredictionForm()">×</button>
+            <h2> Price Prediction Counter</h2>
+            <p class="form-description">
+                Please enter the exact product specifications. Our algorithms require precise data for the best evaluation.
+            </p>
+            
+            <form id="predictionForm" onsubmit="event.preventDefault(); sendDataToModel();">
+                
+                <div class="section-title">Basic information</div>
+                <div class="form-group">
+                    <label for="productName">Product Name</label>
+                    <input type="text" id="productName" name="productName" placeholder="Ex: Wireless Bluetooth Headphones" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="mainCategory">Main Category</label>
+                    <select id="mainCategory" name="mainCategory" required>
+                        <option value="" disabled selected>Select a category...</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Home">Home</option>
+                        <option value="Fashion">Fashion</option>
+                        <option value="Beauty">Beauty</option>
+                        <option value="Sports">Sports & Outdoors</option>
+                        <option value="Books">Books & Media</option>
+                    </select>
+                </div>
+
+                <div class="section-title">Pricing & popularity</div>
+                <div class="form-row">
+                    <div class="form-group half-width">
+                        <label for="actualPriceClean">Original Price (€)</label>
+                        <input type="number" id="actualPriceClean" name="actualPriceClean" step="0.01" min="0" placeholder="Ex: 79.99" required>
+                    </div>
+                    <div class="form-group half-width">
+                        <label for="discountPct">Discount (%)</label>
+                        <input type="number" id="discountPct" name="discountPct" step="0.1" min="0" max="100" placeholder="Ex: 20" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half-width">
+                        <label for="ratingClean">Average Product Rating (out of 5.0)</label>
+                        <input type="number" id="ratingClean" name="ratingClean" step="0.1" min="0" max="5.0" placeholder="Ex: 4.3" required>
+                    </div>
+
+                    <div class="form-group half-width">
+                        <label for="ratingCountClean">Review Count</label>
+                        <input type="number" id="ratingCountClean" name="ratingCountClean" min="0" placeholder="Ex: 5800" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="popularityScore">Popularity Score (0–1)</label>
+                    <input type="number" id="popularityScore" name="popularityScore" step="0.01" min="0" max="1" placeholder="Ex: 0.75" required>
+                </div>
+
+                <button type="submit" class="predict-button">
+                     PREDICT WITH AI (XGBoost + K-Means)
+                </button>
+
+                <div id="resultArea" class="result-area" style="display: none;">
+                    <p><span class="result-label">Predicted Discounted Price:</span>
+                        <span id="predictedPrice">---</span>
+                    </p>
+                    <p><span class="result-label">Price Category:</span>
+                        <span id="predictedCategory">---</span>
+                    </p>
+                    <p><span class="result-label">Cluster:</span>
+                        <span id="predictedCluster">---</span>
+                    </p>
+                    <p id="clusterDescriptionLine" style="display:none;">
+                        <span class="result-label">Cluster Description:</span>
+                        <span id="clusterDescription">---</span>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PLACEHOLDER MODAL -->
+    <div id="placeholderOverlay" class="overlay">
+        <div class="modal-card placeholder-card">
+            <button class="close-btn" onclick="closePlaceholder()">×</button>
+            <h3 id="placeholderTitle">Feature Under Construction</h3>
+            <p>We didn't think you would enter here! This section (<span id="placeholderArea"></span>) is currently in development. Please return to the main price prediction counter.</p>
+            <button class="predict-button" onclick="closePlaceholder()" style="margin-top: 0;">
+                Back to the Counter
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- FORM FUNCTIONS ---
+        function showPredictionForm() {
+            document.getElementById('predictionFormOverlay').classList.add('active');
+        }
+
+        function closePredictionForm() {
+            document.getElementById('predictionFormOverlay').classList.remove('active');
+            document.getElementById('resultArea').style.display = 'none';
+        }
+
+        function sendDataToModel() {
+            // 1. Get form data
+            const productName = document.getElementById('productName').value;
+            const mainCategory = document.getElementById('mainCategory').value;
+            const actualPriceClean = parseFloat(document.getElementById('actualPriceClean').value);
+            const discountPct = parseFloat(document.getElementById('discountPct').value);
+            const ratingClean = parseFloat(document.getElementById('ratingClean').value);
+            const ratingCountClean = parseInt(document.getElementById('ratingCountClean').value, 10);
+            const popularityScore = parseFloat(document.getElementById('popularityScore').value);
+
+            // 2. Prepare JSON payload – aligned with features used in the notebook
+            const productData = {
+                product_name: productName,
+                main_category: mainCategory,
+                actual_price_clean: actualPriceClean,
+                discount_pct: discountPct,
+                rating_clean: ratingClean,
+                rating_count_clean: ratingCountClean,
+                popularity_score: popularityScore
+            };
+
+            console.log("Data ready to be sent to backend model:", productData);
+
+            // 3. Call backend API (to be implemented with Flask/FastAPI + saved XGBoost/KMeans models)
+            // If the API is not available, we fallback to a simple front-end simulation.
+            fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(productData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Backend not available');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Expected data format:
+                // {
+                //   predicted_discounted_price: float,
+                //   price_category_num: int,
+                //   price_category_label: "Bas/Moyen/Élevé",
+                //   cluster: int,
+                //   cluster_description: string (optional)
+                // }
+                console.log("Prediction from backend:", data);
+                displayPrediction(
+                    data.predicted_discounted_price,
+                    data.price_category_label,
+                    data.cluster,
+                    data.cluster_description
+                );
+            })
+            .catch(err => {
+                console.warn("Backend prediction failed, using local simulation:", err);
+
+                // SIMPLE FALLBACK SIMULATION (same spirit as your original demo)
+                const discountedPrice = actualPriceClean * (1 - (discountPct / 100));
+                const basePrice = (ratingClean * 50) + (Math.log10(ratingCountClean + 1) * 20);
+                const priceFactor = (mainCategory === 'Electronics') ? 1.5 :
+                                    (mainCategory === 'Fashion') ? 0.8 : 1.0;
+                const simulatedPrice = (0.5 * discountedPrice) + (0.5 * basePrice * priceFactor);
+
+                // basic heuristic for category
+                let catLabel = 'Moyen';
+                if (simulatedPrice < 20) catLabel = 'Bas';
+                else if (simulatedPrice > 100) catLabel = 'Élevé';
+
+                // pseudo-cluster
+                let clusterIdx = 0;
+                if (simulatedPrice >= 100 && ratingClean >= 4.5) clusterIdx = 3;
+                else if (simulatedPrice >= 60) clusterIdx = 2;
+                else if (simulatedPrice >= 30) clusterIdx = 1;
+
+                let clusterDesc = '';
+                if (clusterIdx === 3) clusterDesc = 'Produits premium, marque de luxe, état \"neuf\"';
+                else if (clusterIdx === 2) clusterDesc = 'Produits de milieu / haut de gamme';
+                else if (clusterIdx === 1) clusterDesc = 'Produits grand public, bon rapport qualité-prix';
+                else clusterDesc = 'Produits entrée de gamme, très accessibles';
+
+                displayPrediction(simulatedPrice, catLabel, clusterIdx, clusterDesc);
+            });
+        }
+
+        function displayPrediction(price, categoryLabel, clusterIdx, clusterDescription) {
+            const resultArea = document.getElementById('resultArea');
+            const predictedPriceSpan = document.getElementById('predictedPrice');
+            const predictedCategorySpan = document.getElementById('predictedCategory');
+            const predictedClusterSpan = document.getElementById('predictedCluster');
+            const clusterDescriptionSpan = document.getElementById('clusterDescription');
+            const clusterDescriptionLine = document.getElementById('clusterDescriptionLine');
+
+            if (typeof price === 'number') {
+                predictedPriceSpan.textContent = `${price.toFixed(2)} €`;
+            } else {
+                predictedPriceSpan.textContent = price || '---';
+            }
+
+            predictedCategorySpan.textContent = categoryLabel || '---';
+            predictedClusterSpan.textContent = (clusterIdx !== undefined && clusterIdx !== null)
+                ? `Cluster ${clusterIdx}`
+                : '---';
+
+            if (clusterDescription) {
+                clusterDescriptionSpan.textContent = clusterDescription;
+                clusterDescriptionLine.style.display = 'block';
+            } else {
+                clusterDescriptionSpan.textContent = '---';
+                clusterDescriptionLine.style.display = 'none';
+            }
+
+            resultArea.style.display = 'block';
+        }
+
+        // --- PLACEHOLDER FUNCTIONS ---
+        function showPlaceholder(areaName) {
+            document.getElementById('placeholderArea').textContent = areaName;
+            document.getElementById('placeholderTitle').textContent = `${areaName} Feature Under Construction`;
+            document.getElementById('placeholderOverlay').classList.add('active');
+        }
+
+        function closePlaceholder() {
+            document.getElementById('placeholderOverlay').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
