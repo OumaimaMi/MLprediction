@@ -23,10 +23,4 @@ dynamiques plutôt qu'un prix fixe, en s'appuyant sur des données historiques
 - Pandas / NumPy
 - Flask (`app.py`) pour servir le modèle
 
-##  Structure du projet
-├── notebooks/
-│ └── deepvision_models.ipynb # Exploration et entraînement des modèles
-├── templates/ # Templates HTML pour l'app Flask
-├── app.py # Point d'entrée de l'application
-├── requirements.txt
-└── README.md
+
